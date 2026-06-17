@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.kuaidi.mapper.ShelfMapper">
+
+    <select id="findAll" resultType="com.example.kuaidi.entity.Shelf">
+        SELECT * FROM shelf ORDER BY shelf_code
+    </select>
+
+    <select id="findById" resultType="com.example.kuaidi.entity.Shelf">
+        SELECT * FROM shelf WHERE id = #{id}
+    </select>
+
+    <select id="findByCode" resultType="com.example.kuaidi.entity.Shelf">
+        SELECT * FROM shelf WHERE shelf_code = #{shelfCode}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO shelf (shelf_code, capacity, used_count, status)
+        VALUES (#{shelfCode}, #{capacity}, #{usedCount}, #{status})
+    </insert>
+
+    <update id="update">
+        UPDATE shelf
+        SET shelf_code = #{shelfCode}, capacity = #{capacity}, status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM shelf WHERE id = #{id}
+    </delete>
+
+    <update id="incrementUsedCount">
+        UPDATE shelf SET used_count = used_count + 1 WHERE id = #{id}
+    </update>
+
+    <update id="decrementUsedCount">
+        UPDATE shelf SET used_count = used_count - 1 WHERE id = #{id} AND used_count > 0
+    </update>
+
+</mapper>

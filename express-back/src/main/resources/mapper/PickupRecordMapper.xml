@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.kuaidi.mapper.PickupRecordMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO pickup_record (package_id, pickup_type, operator_id)
+        VALUES (#{packageId}, #{pickupType}, #{operatorId})
+    </insert>
+
+    <select id="findByPackageId" resultType="com.example.kuaidi.entity.PickupRecord">
+        SELECT * FROM pickup_record WHERE package_id = #{packageId} ORDER BY pickup_time DESC
+    </select>
+
+</mapper>

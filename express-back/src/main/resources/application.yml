@@ -1,0 +1,20 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/express_station?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.example.kuaidi.entity
+  configuration:
+    map-underscore-to-camel-case: true   # 开启驼峰命名自动映射
+
+# JWT 配置（后续使用）
+jwt:
+  secret: mySecretKeyForExpressStation2024!@#
+  expiration: 86400000   # 24小时

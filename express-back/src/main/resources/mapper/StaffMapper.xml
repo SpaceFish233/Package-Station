@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.kuaidi.mapper.StaffMapper">
+
+    <select id="findByUsername" resultType="com.example.kuaidi.entity.Staff">
+        SELECT * FROM staff WHERE username = #{username}
+    </select>
+
+    <select id="findById" resultType="com.example.kuaidi.entity.Staff">
+        SELECT * FROM staff WHERE id = #{id}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO staff (username, password, real_name, phone, role)
+        VALUES (#{username}, #{password}, #{realName}, #{phone}, #{role})
+    </insert>
+
+</mapper>

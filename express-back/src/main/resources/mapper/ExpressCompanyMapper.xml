@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.kuaidi.mapper.ExpressCompanyMapper">
+
+    <select id="findAll" resultType="com.example.kuaidi.entity.ExpressCompany">
+        SELECT * FROM express_company ORDER BY id
+    </select>
+
+    <select id="findById" resultType="com.example.kuaidi.entity.ExpressCompany">
+        SELECT * FROM express_company WHERE id = #{id}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO express_company (company_name, code)
+        VALUES (#{companyName}, #{code})
+    </insert>
+
+    <update id="update">
+        UPDATE express_company
+        SET company_name = #{companyName}, code = #{code}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM express_company WHERE id = #{id}
+    </delete>
+
+</mapper>
