@@ -14,6 +14,9 @@ express-back/target
 express-back/HELP.md
 express-back/*.log
 
+# 后端敏感配置（含数据库密码、JWT密钥）
+express-back/src/main/resources/application.yml
+
 ### STS ###
 .apt_generated
 .classpath
