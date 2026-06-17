@@ -10,6 +10,12 @@ const router = createRouter({
       meta: { public: true },
     },
     {
+      path: '/register',
+      name: 'register',
+      component: () => import('@/views/Register.vue'),
+      meta: { public: true },
+    },
+    {
       path: '/pickup',
       name: 'pickup',
       component: () => import('@/views/Pickup.vue'),

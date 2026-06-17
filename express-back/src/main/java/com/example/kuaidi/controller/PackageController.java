@@ -10,6 +10,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/packages")
 public class PackageController {
@@ -34,13 +36,16 @@ public class PackageController {
     }
 
     @GetMapping("/query")
-    public ResultVO<Package> query(@RequestParam(required = false) String pickupCode,
-                                   @RequestParam(required = false) String phone) {
-        Package pkg = packageService.queryByPickupCodeOrPhone(pickupCode, phone);
-        if (pkg == null) {
-            return ResultVO.error(404, "未找到符合条件的包裹");
-        }
-        return ResultVO.success(pkg);
+    public ResultVO<List<Package>> query(@RequestParam(required = false) String trackingNumber,
+                                          @RequestParam(required = false) String phone) {
+        List<Package> list = packageService.queryByTrackingNumberOrPhone(trackingNumber, phone);
+        return ResultVO.success(list);
+    }
+
+    @PostMapping("/confirm")
+    public ResultVO<Package> confirmPickup(@RequestBody java.util.Map<String, Integer> body) {
+        Integer packageId = body.get("packageId");
+        return ResultVO.success(packageService.confirmPickup(packageId));
     }
 
     @GetMapping

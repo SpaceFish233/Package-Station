@@ -38,9 +38,10 @@ public class PackageServiceImpl implements PackageService {
             throw new BusinessException("运单号已存在");
         }
 
-        // 校验货架容量
+        Shelf shelf = null;
+        // 校验货架
         if (dto.getShelfId() != null) {
-            Shelf shelf = shelfMapper.findById(dto.getShelfId());
+            shelf = shelfMapper.findById(dto.getShelfId());
             if (shelf == null) {
                 throw new BusinessException("货架不存在");
             }
@@ -49,8 +50,15 @@ public class PackageServiceImpl implements PackageService {
             }
         }
 
-        // 生成唯一取件码
-        String pickupCode = generateUniquePickupCode();
+        // 生成取件码：{货架编号}-{序号}，如 A-01-1
+        String pickupCode;
+        if (shelf != null) {
+            long count = packageMapper.countByShelfId(shelf.getId());
+            pickupCode = PickupCodeUtil.generate(shelf.getShelfCode(), (int) count + 1);
+        } else {
+            // 无货架时使用自增ID作为兜底
+            pickupCode = "NOSHELF-" + System.currentTimeMillis();
+        }
 
         Package pkg = new Package();
         pkg.setTrackingNumber(dto.getTrackingNumber());
@@ -94,20 +102,41 @@ public class PackageServiceImpl implements PackageService {
     }
 
     @Override
-    public Package queryByPickupCodeOrPhone(String pickupCode, String phone) {
-        if (pickupCode != null && !pickupCode.isEmpty()) {
-            Package pkg = packageMapper.findByPickupCode(pickupCode);
-            if (pkg != null && pkg.getStatus() == 0) {
-                return pkg;
-            }
+    public List<Package> queryByTrackingNumberOrPhone(String trackingNumber, String phone) {
+        return packageMapper.findByTrackingNumberOrPhone(trackingNumber, phone);
+    }
+
+    @Override
+    @Transactional
+    public Package confirmPickup(Integer packageId) {
+        Package pkg = packageMapper.findById(packageId);
+        if (pkg == null) {
+            throw new BusinessException("包裹不存在");
         }
-        if (phone != null && !phone.isEmpty()) {
-            List<Package> list = packageMapper.findByReceiverPhone(phone);
-            if (!list.isEmpty()) {
-                return list.get(0);
-            }
+        if (pkg.getStatus() != 0) {
+            throw new BusinessException("该包裹不在库中，无法确认收货");
         }
-        return null;
+
+        // 更新包裹状态为已收货
+        packageMapper.updateStatus(pkg.getId(), 1);
+        packageMapper.updateOutTime(pkg.getId());
+
+        // 取件码标记为已失效
+        packageMapper.updatePickupCode(pkg.getId(), PickupCodeUtil.markInvalid(pkg.getPickupCode()));
+
+        // 记录取件记录（用户自助）
+        PickupRecord record = new PickupRecord();
+        record.setPackageId(pkg.getId());
+        record.setPickupType(1);
+        record.setOperatorId(null);
+        pickupRecordMapper.insert(record);
+
+        // 更新货架已用数量
+        if (pkg.getShelfId() != null) {
+            shelfMapper.decrementUsedCount(pkg.getShelfId());
+        }
+
+        return packageMapper.findById(pkg.getId());
     }
 
     @Override
@@ -143,6 +172,9 @@ public class PackageServiceImpl implements PackageService {
         packageMapper.updateStatus(pkg.getId(), 1); // 已取件
         packageMapper.updateOutTime(pkg.getId());
 
+        // 取件码标记为已失效
+        packageMapper.updatePickupCode(pkg.getId(), PickupCodeUtil.markInvalid(pkg.getPickupCode()));
+
         // 记录取件记录
         PickupRecord record = new PickupRecord();
         record.setPackageId(pkg.getId());
@@ -156,18 +188,5 @@ public class PackageServiceImpl implements PackageService {
         }
 
         return packageMapper.findById(pkg.getId());
-    }
-
-    private String generateUniquePickupCode() {
-        String code;
-        int attempts = 0;
-        do {
-            code = PickupCodeUtil.generate();
-            attempts++;
-            if (attempts > 100) {
-                throw new BusinessException("取件码生成失败，请重试");
-            }
-        } while (packageMapper.findByPickupCode(code) != null);
-        return code;
     }
 }

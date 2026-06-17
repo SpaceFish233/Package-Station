@@ -40,6 +40,19 @@ public class StaffServiceImpl implements StaffService {
     }
 
     @Override
+    public void register(Staff staff) {
+        // 校验用户名（手机号）唯一
+        if (staffMapper.findByUsername(staff.getUsername()) != null) {
+            throw new BusinessException("该手机号已注册");
+        }
+        // 加密密码
+        staff.setPassword(passwordEncoder.encode(staff.getPassword()));
+        // 强制为普通用户
+        staff.setRole(1);
+        staffMapper.insert(staff);
+    }
+
+    @Override
     public Map<String, Object> login(LoginDTO dto) {
         Staff staff = staffMapper.findByUsername(dto.getUsername());
         if (staff == null) {

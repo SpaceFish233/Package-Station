@@ -1,6 +1,7 @@
 package com.example.kuaidi.controller;
 
 import com.example.kuaidi.dto.LoginDTO;
+import com.example.kuaidi.entity.Staff;
 import com.example.kuaidi.service.StaffService;
 import com.example.kuaidi.vo.ResultVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,5 +19,11 @@ public class AuthController {
     @PostMapping("/login")
     public ResultVO<Map<String, Object>> login(@RequestBody LoginDTO dto) {
         return ResultVO.success(staffService.login(dto));
+    }
+
+    @PostMapping("/register")
+    public ResultVO<Void> register(@RequestBody Staff staff) {
+        staffService.register(staff);
+        return ResultVO.success(null);
     }
 }

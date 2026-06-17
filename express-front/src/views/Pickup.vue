@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { queryPackage, selfOutbound } from '@/api'
+import { queryPackage, confirmPickup } from '@/api'
 
 const router = useRouter()
 
@@ -18,63 +18,42 @@ function handleLogout() {
   router.push('/login')
 }
 
-const inputCode = ref('')
-const searchType = ref<'pickupCode' | 'phone'>('pickupCode')
 const loading = ref(false)
-const packageInfo = ref<any>(null)
-const searched = ref(false)
-const pickupSuccess = ref(false)
+const packageList = ref<any[]>([])
 
-async function handleSearch() {
-  if (!inputCode.value.trim()) {
-    ElMessage.warning('请输入查询内容')
-    return
-  }
+// 页面加载时自动查询该用户手机号关联的包裹
+onMounted(async () => {
+  const phone = staffInfo.value.phone || staffInfo.value.username
+  if (!phone) return
   loading.value = true
-  searched.value = false
-  pickupSuccess.value = false
   try {
-    const params: any = {}
-    if (searchType.value === 'pickupCode') {
-      params.pickupCode = inputCode.value.trim()
-    } else {
-      params.phone = inputCode.value.trim()
-    }
-    const res: any = await queryPackage(params)
-    packageInfo.value = res.data
-    searched.value = true
-  } catch {
-    packageInfo.value = null
-    searched.value = true
-  } finally {
+    const res: any = await queryPackage({ phone })
+    packageList.value = res.data || []
+  } catch {} finally {
     loading.value = false
   }
-}
+})
 
-async function handlePickup() {
-  if (!packageInfo.value) return
+async function handleConfirm(pkg: any) {
   loading.value = true
   try {
-    const payload: any = { pickupType: 1 }
-    if (searchType.value === 'pickupCode') {
-      payload.pickupCode = inputCode.value.trim()
-    } else {
-      payload.receiverPhone = inputCode.value.trim()
-    }
-    await selfOutbound(payload)
-    ElMessage.success('取件成功！')
-    pickupSuccess.value = true
-    packageInfo.value = null
+    await confirmPickup(pkg.id)
+    ElMessage.success('确认收货成功！')
+    // 刷新列表
+    const phone = staffInfo.value.phone || staffInfo.value.username
+    const res: any = await queryPackage({ phone })
+    packageList.value = res.data || []
   } catch {} finally {
     loading.value = false
   }
 }
 
-function handleReset() {
-  inputCode.value = ''
-  packageInfo.value = null
-  searched.value = false
-  pickupSuccess.value = false
+function statusLabel(status: number) {
+  return status === 0 ? '待取件' : status === 1 ? '已收货' : '异常'
+}
+
+function statusType(status: number) {
+  return status === 0 ? 'warning' : status === 1 ? 'success' : 'danger'
 }
 </script>
 
@@ -94,100 +73,66 @@ function handleReset() {
 
     <!-- 取件内容 -->
     <div class="pickup-body">
-      <!-- 搜索卡 -->
-      <div class="search-section">
-        <el-card class="search-card">
-          <el-row :gutter="12" align="middle">
-            <el-col :span="5">
-              <el-segmented v-model="searchType" :options="[{ label: '取件码', value: 'pickupCode' }, { label: '手机号', value: 'phone' }]" style="width: 100%;" />
-            </el-col>
-            <el-col :span="13">
-              <el-input
-                v-model="inputCode"
-                :placeholder="searchType === 'pickupCode' ? '请输入6位取件码' : '请输入收件人手机号'"
-                size="large"
-                clearable
-                @keyup.enter="handleSearch"
-              >
-                <template #prefix>
-                  <el-icon><Search /></el-icon>
-                </template>
-              </el-input>
-            </el-col>
-            <el-col :span="6">
-              <el-button type="primary" size="large" :loading="loading" @click="handleSearch" style="width: 100%;">
-                查询包裹
-              </el-button>
-            </el-col>
-          </el-row>
-        </el-card>
-      </div>
-
-      <!-- 取件成功 -->
-      <div v-if="pickupSuccess" class="success-section">
-        <el-card class="success-card">
-          <div class="success-content">
-            <el-icon :size="72" color="#34c77b"><CircleCheckFilled /></el-icon>
-            <h2 class="success-title">取件成功</h2>
-            <p class="success-desc">请妥善保管您的包裹，祝您生活愉快！</p>
-            <el-button type="primary" size="large" @click="handleReset" style="margin-top: 20px;">
-              继续查询
-            </el-button>
+      <!-- 用户信息 -->
+      <div class="user-info-section">
+        <el-card>
+          <div class="user-phone-info">
+            <el-icon><Iphone /></el-icon>
+            <span>手机号：<strong>{{ staffInfo.phone || staffInfo.username }}</strong></span>
+            <span class="package-count">共 {{ packageList.length }} 个包裹</span>
           </div>
         </el-card>
       </div>
 
-      <!-- 包裹信息 -->
-      <div v-else-if="searched && packageInfo" class="result-section">
-        <el-card class="result-card">
+      <!-- 包裹列表 -->
+      <div v-if="packageList.length > 0" class="result-section">
+        <el-card v-for="pkg in packageList" :key="pkg.id" class="result-card">
           <template #header>
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <span>包裹信息</span>
-              <el-tag type="warning" size="large">待取件</el-tag>
+              <el-tag :type="statusType(pkg.status)" size="large">{{ statusLabel(pkg.status) }}</el-tag>
             </div>
           </template>
 
           <div class="package-detail">
-            <div class="detail-row">
-              <span class="detail-label">运单号</span>
-              <span class="detail-value">{{ packageInfo.trackingNumber }}</span>
-            </div>
             <div class="detail-highlight">
               <span class="detail-label">取件码</span>
-              <span class="detail-value pickup-code">{{ packageInfo.pickupCode }}</span>
+              <span class="detail-value pickup-code">{{ pkg.pickupCode }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">运单号</span>
+              <span class="detail-value">{{ pkg.trackingNumber }}</span>
             </div>
             <div class="detail-row">
               <span class="detail-label">收件人</span>
-              <span class="detail-value">{{ packageInfo.receiverName }}</span>
+              <span class="detail-value">{{ pkg.receiverName }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">手机号</span>
+              <span class="detail-value">{{ pkg.receiverPhone }}</span>
             </div>
             <div class="detail-row">
               <span class="detail-label">快递公司</span>
-              <span class="detail-value">{{ packageInfo.companyName || '-' }}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">货架位置</span>
-              <span class="detail-value shelf-code">{{ packageInfo.shelfCode || '-' }}</span>
+              <span class="detail-value">{{ pkg.companyName || '-' }}</span>
             </div>
             <div class="detail-row">
               <span class="detail-label">入库时间</span>
-              <span class="detail-value">{{ packageInfo.inTime }}</span>
+              <span class="detail-value">{{ pkg.inTime }}</span>
             </div>
           </div>
 
-          <div class="action-bar">
-            <el-button type="primary" size="large" :loading="loading" @click="handlePickup" style="width: 240px; height: 50px; font-size: 1.05rem;">
-              确认取件
+          <div v-if="pkg.status === 0" class="action-bar">
+            <el-button type="primary" size="large" :loading="loading" @click="handleConfirm(pkg)" style="width: 240px; height: 50px; font-size: 1.05rem;">
+              确认收货
             </el-button>
           </div>
         </el-card>
       </div>
 
-      <!-- 未找到 -->
-      <div v-else-if="searched && !packageInfo" class="empty-section">
+      <!-- 无包裹 -->
+      <div v-else class="empty-section">
         <el-card class="empty-card">
-          <el-empty description="未找到符合条件的包裹，请核实后重试">
-            <el-button type="primary" @click="handleReset">重新查询</el-button>
-          </el-empty>
+          <el-empty description="暂无关联包裹" />
         </el-card>
       </div>
     </div>
@@ -273,34 +218,31 @@ function handleReset() {
   z-index: 1;
 }
 
-.search-section {
-  margin-bottom: 24px;
+.user-info-section {
+  margin-bottom: 20px;
 }
 
-/* 成功 */
-.success-card {
-  text-align: center;
+.user-phone-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  color: var(--color-primary);
 }
 
-.success-content {
-  padding: 32px 0;
+.user-phone-info .el-icon {
+  color: var(--color-accent);
 }
 
-.success-title {
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--color-success);
-  margin: 16px 0 8px;
-}
-
-.success-desc {
+.package-count {
+  margin-left: auto;
   color: var(--color-text-muted);
+  font-size: 0.85rem;
 }
 
 /* 包裹详情 */
 .result-card {
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .package-detail {
@@ -341,13 +283,6 @@ function handleReset() {
   font-weight: 800;
   color: var(--color-accent);
   letter-spacing: 0.15em;
-}
-
-.shelf-code {
-  font-family: var(--font-display);
-  font-weight: 700;
-  color: var(--color-info);
-  font-size: 1.05rem;
 }
 
 .action-bar {

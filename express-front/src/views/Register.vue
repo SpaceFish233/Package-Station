@@ -2,41 +2,41 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { login } from '@/api'
+import { register } from '@/api'
 
 const router = useRouter()
 const loading = ref(false)
-const form = ref({ username: '', password: '' })
+const form = ref({
+  username: '',
+  password: '',
+  confirmPassword: '',
+  realName: '',
+  phone: '',
+})
 
-// 测试账号列表
-const testAccounts = [
-  { label: '管理员', username: 'admin', password: '123456' },
-  { label: '测试用户', username: '18864667916', password: '123456' },
-]
-
-function fillAccount(account: { username: string; password: string }) {
-  form.value.username = account.username
-  form.value.password = account.password
-}
-
-async function handleLogin() {
-  if (!form.value.username || !form.value.password) {
-    ElMessage.warning('请输入用户名和密码')
+async function handleRegister() {
+  if (!form.value.phone || !form.value.password || !form.value.realName) {
+    ElMessage.warning('请填写所有必填项')
+    return
+  }
+  if (form.value.password !== form.value.confirmPassword) {
+    ElMessage.warning('两次密码不一致')
+    return
+  }
+  if (!/^1\d{10}$/.test(form.value.phone)) {
+    ElMessage.warning('请输入正确的手机号')
     return
   }
   loading.value = true
   try {
-    const res: any = await login(form.value)
-    localStorage.setItem('token', res.data.token)
-    localStorage.setItem('staffInfo', JSON.stringify(res.data.staffInfo))
-    ElMessage.success('登录成功')
-    // 根据角色跳转：管理员->工作台，普通用户->取件页
-    const role = res.data.staffInfo?.role ?? 1
-    if (role === 0) {
-      router.push('/')
-    } else {
-      router.push('/pickup')
-    }
+    await register({
+      username: form.value.phone,
+      password: form.value.password,
+      realName: form.value.realName,
+      phone: form.value.phone,
+    })
+    ElMessage.success('注册成功，请登录')
+    router.push('/login')
   } catch {
     // 错误已在拦截器处理
   } finally {
@@ -81,18 +81,27 @@ async function handleLogin() {
         <div class="brand-deco"></div>
       </div>
 
-      <!-- 右侧登录表单 -->
+      <!-- 右侧注册表单 -->
       <div class="login-form-wrapper">
         <div class="form-header">
-          <h2 class="form-title">欢迎回来</h2>
-          <p class="form-desc">请输入您的账号登录系统</p>
+          <h2 class="form-title">用户注册</h2>
+          <p class="form-desc">使用手机号注册取件账号</p>
         </div>
 
-        <el-form :model="form" @keyup.enter="handleLogin" class="login-form">
+        <el-form :model="form" @keyup.enter="handleRegister" class="login-form">
           <el-form-item>
             <el-input
-              v-model="form.username"
-              placeholder="请输入用户名"
+              v-model="form.phone"
+              placeholder="手机号（用作登录账号）"
+              prefix-icon="Iphone"
+              size="large"
+              maxlength="11"
+            />
+          </el-form-item>
+          <el-form-item>
+            <el-input
+              v-model="form.realName"
+              placeholder="昵称"
               prefix-icon="User"
               size="large"
             />
@@ -101,7 +110,17 @@ async function handleLogin() {
             <el-input
               v-model="form.password"
               type="password"
-              placeholder="请输入密码"
+              placeholder="请设置密码"
+              prefix-icon="Lock"
+              size="large"
+              show-password
+            />
+          </el-form-item>
+          <el-form-item>
+            <el-input
+              v-model="form.confirmPassword"
+              type="password"
+              placeholder="请再次输入密码"
               prefix-icon="Lock"
               size="large"
               show-password
@@ -112,32 +131,15 @@ async function handleLogin() {
             size="large"
             :loading="loading"
             class="login-btn"
-            @click="handleLogin"
+            @click="handleRegister"
           >
-            {{ loading ? '登录中...' : '登 录' }}
+            {{ loading ? '注册中...' : '注 册' }}
           </el-button>
         </el-form>
 
-        <!-- 测试账号快捷登录 -->
-        <div class="test-accounts">
-          <div class="test-title">测试账号快捷登录</div>
-          <div class="test-buttons">
-            <el-button
-              v-for="account in testAccounts"
-              :key="account.username"
-              size="small"
-              plain
-              @click="fillAccount(account)"
-            >
-              {{ account.label }}
-            </el-button>
-          </div>
-        </div>
-
-        <!-- 注册链接 -->
-        <div class="form-footer" style="margin-top: 16px;">
-          <span class="footer-text">没有账号？</span>
-          <router-link to="/register" class="footer-link">手机号注册</router-link>
+        <div class="form-footer">
+          <span class="footer-text">已有账号？</span>
+          <router-link to="/login" class="footer-link">返回登录</router-link>
         </div>
       </div>
     </div>
@@ -155,7 +157,6 @@ async function handleLogin() {
   overflow: hidden;
 }
 
-/* 背景装饰 */
 .login-bg {
   position: absolute;
   inset: 0;
@@ -193,11 +194,10 @@ async function handleLogin() {
   left: -100px;
 }
 
-/* 登录容器 */
 .login-container {
   display: flex;
   width: 900px;
-  min-height: 520px;
+  min-height: 560px;
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 25px 80px rgba(0,0,0,0.5);
@@ -206,7 +206,6 @@ async function handleLogin() {
   animation: fadeSlideUp 0.6s ease-out;
 }
 
-/* 左侧品牌 */
 .login-brand {
   flex: 1;
   background: linear-gradient(160deg, #1a2744 0%, #243556 100%);
@@ -284,7 +283,6 @@ async function handleLogin() {
   color: var(--color-accent);
 }
 
-/* 右侧表单 */
 .login-form-wrapper {
   flex: 1;
   background: #fff;
@@ -343,45 +341,6 @@ async function handleLogin() {
 
 .footer-link:hover {
   text-decoration: underline;
-}
-
-.pickup-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--color-info);
-  font-size: 0.85rem;
-  font-weight: 500;
-  transition: color 0.2s;
-}
-
-.pickup-link:hover {
-  color: var(--color-accent);
-}
-
-/* 测试账号 */
-.test-accounts {
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px dashed var(--color-border-light);
-  text-align: center;
-}
-
-.test-title {
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
-  margin-bottom: 12px;
-}
-
-.test-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-}
-
-.test-buttons .el-button {
-  font-size: 0.8rem;
 }
 
 @keyframes fadeSlideUp {

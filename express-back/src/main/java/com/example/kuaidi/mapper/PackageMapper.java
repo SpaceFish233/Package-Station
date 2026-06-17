@@ -10,10 +10,12 @@ public interface PackageMapper {
     int insert(Package pkg);
     int updateStatus(@Param("id") Integer id, @Param("status") Integer status);
     int updateOutTime(@Param("id") Integer id);
+    int updatePickupCode(@Param("id") Integer id, @Param("pickupCode") String pickupCode);
     Package findById(@Param("id") Integer id);
     Package findByTrackingNumber(@Param("trackingNumber") String trackingNumber);
     Package findByPickupCode(@Param("pickupCode") String pickupCode);
     List<Package> findByReceiverPhone(@Param("phone") String phone);
+    List<Package> findByTrackingNumberOrPhone(@Param("trackingNumber") String trackingNumber, @Param("phone") String phone);
     List<Package> findWithConditions(@Param("trackingNumber") String trackingNumber,
                                      @Param("pickupCode") String pickupCode,
                                      @Param("phone") String phone,
@@ -27,4 +29,5 @@ public interface PackageMapper {
     long countTodayIn();
     long countTodayOut();
     long countStock();
+    long countByShelfId(@Param("shelfId") Integer shelfId);
 }

@@ -52,6 +52,7 @@ public class JwtInterceptor implements HandlerInterceptor {
                 String uri = request.getRequestURI();
                 boolean allowed = uri.equals("/api/packages/outbound/self")
                         || uri.equals("/api/packages/query")
+                        || uri.equals("/api/packages/confirm")
                         || uri.startsWith("/api/packages/outbound/self/");
                 if (!allowed) {
                     writeError(response, 403, "权限不足，普通用户只能使用自助取件功能");

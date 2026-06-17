@@ -46,6 +46,10 @@
         UPDATE package SET out_time = NOW() WHERE id = #{id}
     </update>
 
+    <update id="updatePickupCode">
+        UPDATE package SET pickup_code = #{pickupCode} WHERE id = #{id}
+    </update>
+
     <select id="findById" resultMap="packageResultMap">
         SELECT <include refid="columns"/> FROM package p
         <include refid="joins"/>
@@ -68,6 +72,19 @@
         SELECT <include refid="columns"/> FROM package p
         <include refid="joins"/>
         WHERE p.receiver_phone = #{phone} AND p.status = 0
+    </select>
+
+    <select id="findByTrackingNumberOrPhone" resultMap="packageResultMap">
+        SELECT <include refid="columns"/> FROM package p
+        <include refid="joins"/>
+        WHERE 1=1
+        <if test="trackingNumber != null and trackingNumber != ''">
+            OR p.tracking_number = #{trackingNumber}
+        </if>
+        <if test="phone != null and phone != ''">
+            OR p.receiver_phone = #{phone}
+        </if>
+        ORDER BY p.in_time DESC
     </select>
 
     <select id="findWithConditions" resultMap="packageResultMap">
@@ -119,6 +136,10 @@
 
     <select id="countStock" resultType="long">
         SELECT COUNT(*) FROM package WHERE status = 0
+    </select>
+
+    <select id="countByShelfId" resultType="long">
+        SELECT COUNT(*) FROM package WHERE shelf_id = #{shelfId} AND status = 0
     </select>
 
 </mapper>

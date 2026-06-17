@@ -1,8 +1,12 @@
 import request from '@/utils/request'
 
-// ---- 登录 ----
+// ---- 登录/注册 ----
 export function login(data: { username: string; password: string }) {
   return request.post('/login', data)
+}
+
+export function register(data: { username: string; password: string; realName: string; phone: string }) {
+  return request.post('/register', data)
 }
 
 // ---- 统计 ----
@@ -23,8 +27,12 @@ export function staffOutbound(data: any) {
   return request.post('/packages/outbound/staff', data)
 }
 
-export function queryPackage(params: { pickupCode?: string; phone?: string }) {
+export function queryPackage(params: { trackingNumber?: string; phone?: string }) {
   return request.get('/packages/query', { params })
+}
+
+export function confirmPickup(packageId: number) {
+  return request.post('/packages/confirm', { packageId })
 }
 
 export function getPackageList(params: any) {
