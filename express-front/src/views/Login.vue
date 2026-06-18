@@ -345,20 +345,6 @@ async function handleLogin() {
   text-decoration: underline;
 }
 
-.pickup-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--color-info);
-  font-size: 0.85rem;
-  font-weight: 500;
-  transition: color 0.2s;
-}
-
-.pickup-link:hover {
-  color: var(--color-accent);
-}
-
 /* 测试账号 */
 .test-accounts {
   margin-top: 20px;

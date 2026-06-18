@@ -67,7 +67,7 @@ function statusType(status: number) {
           <el-icon :size="36"><Box /></el-icon>
         </div>
         <h1 class="header-title">快递取件</h1>
-        <p class="header-desc">输入取件码或手机号查询您的包裹</p>
+        <p class="header-desc">查看您的包裹信息并确认收货</p>
       </div>
     </div>
 

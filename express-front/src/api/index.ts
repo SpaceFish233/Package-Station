@@ -19,10 +19,6 @@ export function inboundPackage(data: any) {
   return request.post('/packages/inbound', data)
 }
 
-export function selfOutbound(data: any) {
-  return request.post('/packages/outbound/self', data)
-}
-
 export function staffOutbound(data: any) {
   return request.post('/packages/outbound/staff', data)
 }
