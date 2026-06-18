@@ -107,6 +107,14 @@ public class PackageServiceImpl implements PackageService {
     }
 
     @Override
+    public List<Package> queryByPhones(List<String> phones) {
+        if (phones == null || phones.isEmpty()) {
+            return List.of();
+        }
+        return packageMapper.findByPhones(phones);
+    }
+
+    @Override
     @Transactional
     public Package confirmPickup(Integer packageId) {
         Package pkg = packageMapper.findById(packageId);

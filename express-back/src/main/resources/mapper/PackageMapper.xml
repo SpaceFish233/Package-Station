@@ -74,6 +74,16 @@
         WHERE p.receiver_phone = #{phone} AND p.status = 0
     </select>
 
+    <select id="findByPhones" resultMap="packageResultMap">
+        SELECT <include refid="columns"/> FROM package p
+        <include refid="joins"/>
+        WHERE p.receiver_phone IN
+        <foreach collection="phones" item="phone" open="(" separator="," close=")">
+            #{phone}
+        </foreach>
+        AND p.status = 0
+    </select>
+
     <select id="findByTrackingNumberOrPhone" resultMap="packageResultMap">
         SELECT <include refid="columns"/> FROM package p
         <include refid="joins"/>

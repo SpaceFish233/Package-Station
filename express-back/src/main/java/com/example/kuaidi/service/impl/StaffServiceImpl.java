@@ -76,4 +76,32 @@ public class StaffServiceImpl implements StaffService {
         result.put("staffInfo", staffInfo);
         return result;
     }
+
+    @Override
+    public Staff getById(Integer id) {
+        return staffMapper.findById(id);
+    }
+
+    @Override
+    public void updateRealName(Integer id, String realName) {
+        if (realName == null || realName.trim().isEmpty()) {
+            throw new BusinessException("昵称不能为空");
+        }
+        staffMapper.updateRealName(id, realName.trim());
+    }
+
+    @Override
+    public void updatePassword(Integer id, String oldPassword, String newPassword) {
+        Staff staff = staffMapper.findById(id);
+        if (staff == null) {
+            throw new BusinessException("用户不存在");
+        }
+        if (!checkPassword(oldPassword, staff.getPassword())) {
+            throw new BusinessException("原密码错误");
+        }
+        if (newPassword == null || newPassword.length() < 6) {
+            throw new BusinessException("新密码长度不能少于6位");
+        }
+        staffMapper.updatePassword(id, passwordEncoder.encode(newPassword));
+    }
 }

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.kuaidi.mapper.NotificationMapper">
+
+    <resultMap id="notificationResultMap" type="com.example.kuaidi.entity.Notification">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="publisherId" column="publisher_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="publisherName" column="publisher_name"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="notificationResultMap">
+        SELECT n.*, s.real_name AS publisher_name
+        FROM notification n
+        LEFT JOIN staff s ON n.publisher_id = s.id
+        ORDER BY n.create_time DESC
+    </select>
+
+    <select id="findById" resultMap="notificationResultMap">
+        SELECT n.*, s.real_name AS publisher_name
+        FROM notification n
+        LEFT JOIN staff s ON n.publisher_id = s.id
+        WHERE n.id = #{id}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO notification (title, content, publisher_id)
+        VALUES (#{title}, #{content}, #{publisherId})
+    </insert>
+
+    <update id="update">
+        UPDATE notification
+        SET title = #{title}, content = #{content}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM notification WHERE id = #{id}
+    </delete>
+
+</mapper>

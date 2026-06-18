@@ -2,7 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { queryPackage, confirmPickup } from '@/api'
+import { getMyPackages, confirmPickup } from '@/api'
 
 const router = useRouter()
 
@@ -21,13 +21,11 @@ function handleLogout() {
 const loading = ref(false)
 const packageList = ref<any[]>([])
 
-// 页面加载时自动查询该用户手机号关联的包裹
+// 页面加载时自动查询该用户关联的所有包裹（主手机号 + 额外手机号）
 onMounted(async () => {
-  const phone = staffInfo.value.phone || staffInfo.value.username
-  if (!phone) return
   loading.value = true
   try {
-    const res: any = await queryPackage({ phone })
+    const res: any = await getMyPackages()
     packageList.value = res.data || []
   } catch {} finally {
     loading.value = false
@@ -40,8 +38,7 @@ async function handleConfirm(pkg: any) {
     await confirmPickup(pkg.id)
     ElMessage.success('确认收货成功！')
     // 刷新列表
-    const phone = staffInfo.value.phone || staffInfo.value.username
-    const res: any = await queryPackage({ phone })
+    const res: any = await getMyPackages()
     packageList.value = res.data || []
   } catch {} finally {
     loading.value = false
@@ -80,6 +77,11 @@ function statusType(status: number) {
             <el-icon><Iphone /></el-icon>
             <span>手机号：<strong>{{ staffInfo.phone || staffInfo.username }}</strong></span>
             <span class="package-count">共 {{ packageList.length }} 个包裹</span>
+          </div>
+          <div class="user-center-link">
+            <router-link to="/u/center" class="link-text">
+              <el-icon><Setting /></el-icon> 添加额外手机号可查看更多包裹
+            </router-link>
           </div>
         </el-card>
       </div>
@@ -238,6 +240,22 @@ function statusType(status: number) {
   margin-left: auto;
   color: var(--color-text-muted);
   font-size: 0.85rem;
+}
+
+.user-center-link {
+  margin-top: 8px;
+  font-size: 0.85rem;
+}
+
+.link-text {
+  color: var(--color-accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.link-text:hover {
+  text-decoration: underline;
 }
 
 /* 包裹详情 */

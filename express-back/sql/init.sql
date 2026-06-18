@@ -63,14 +63,34 @@ CREATE TABLE IF NOT EXISTS pickup_record (
     FOREIGN KEY (operator_id) REFERENCES staff(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 6. 用户额外手机号表
+CREATE TABLE IF NOT EXISTS user_phone (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    staff_id INT NOT NULL COMMENT '用户ID',
+    phone VARCHAR(20) NOT NULL COMMENT '额外手机号',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (staff_id) REFERENCES staff(id),
+    UNIQUE KEY uk_phone (phone)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 7. 系统通知表
+CREATE TABLE IF NOT EXISTS notification (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(100) NOT NULL COMMENT '通知标题',
+    content TEXT COMMENT '通知内容',
+    publisher_id INT COMMENT '发布者ID',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (publisher_id) REFERENCES staff(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- 初始数据（密码均为 123456，BCrypt 加密）
-INSERT INTO staff (username, password, real_name, phone, role) VALUES
+INSERT IGNORE INTO staff (username, password, real_name, phone, role) VALUES
 ('admin', '$2a$10$1q16D1tctIl2N/m/w6734ui5nOx0jCgU3peL4MICOExF8sV2glFYO', '系统管理员', '13800000000', 0),
 ('user1', '$2a$10$1q16D1tctIl2N/m/w6734ui5nOx0jCgU3peL4MICOExF8sV2glFYO', '测试用户1', '13800000001', 1),
 ('user2', '$2a$10$1q16D1tctIl2N/m/w6734ui5nOx0jCgU3peL4MICOExF8sV2glFYO', '测试用户2', '13800000002', 1),
 ('user3', '$2a$10$1q16D1tctIl2N/m/w6734ui5nOx0jCgU3peL4MICOExF8sV2glFYO', '测试用户3', '13800000003', 1);
 
-INSERT INTO express_company (company_name, code) VALUES
+INSERT IGNORE INTO express_company (company_name, code) VALUES
 ('顺丰速运', 'SF'),
 ('圆通速递', 'YTO'),
 ('中通快递', 'ZTO'),
@@ -79,7 +99,7 @@ INSERT INTO express_company (company_name, code) VALUES
 ('百世快递', 'HTKY'),
 ('极兔速递', 'JT');
 
-INSERT INTO shelf (shelf_code, capacity, used_count, status) VALUES
+INSERT IGNORE INTO shelf (shelf_code, capacity, used_count, status) VALUES
 ('A-01', 50, 0, 1),
 ('A-02', 50, 0, 1),
 ('A-03', 50, 0, 1),
@@ -99,7 +119,27 @@ ALTER TABLE staff ADD COLUMN role TINYINT DEFAULT 1 COMMENT '0-工作人员/管�
 UPDATE staff SET password = '$2a$10$1q16D1tctIl2N/m/w6734ui5nOx0jCgU3peL4MICOExF8sV2glFYO', role = 0 WHERE username = 'admin';
 
 -- 3. 插入测试用户（密码均为 123456）
-INSERT INTO staff (username, password, real_name, phone, role) VALUES
+INSERT IGNORE INTO staff (username, password, real_name, phone, role) VALUES
 ('user1', '$2a$10$1q16D1tctIl2N/m/w6734ui5nOx0jCgU3peL4MICOExF8sV2glFYO', '测试用户1', '13800000001', 1),
 ('user2', '$2a$10$1q16D1tctIl2N/m/w6734ui5nOx0jCgU3peL4MICOExF8sV2glFYO', '测试用户2', '13800000002', 1),
 ('user3', '$2a$10$1q16D1tctIl2N/m/w6734ui5nOx0jCgU3peL4MICOExF8sV2glFYO', '测试用户3', '13800000003', 1);
+
+-- 4. 用户额外手机号表
+CREATE TABLE IF NOT EXISTS user_phone (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    staff_id INT NOT NULL COMMENT '用户ID',
+    phone VARCHAR(20) NOT NULL COMMENT '额外手机号',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (staff_id) REFERENCES staff(id),
+    UNIQUE KEY uk_phone (phone)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 5. 系统通知表
+CREATE TABLE IF NOT EXISTS notification (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(100) NOT NULL COMMENT '通知标题',
+    content TEXT COMMENT '通知内容',
+    publisher_id INT COMMENT '发布者ID',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (publisher_id) REFERENCES staff(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

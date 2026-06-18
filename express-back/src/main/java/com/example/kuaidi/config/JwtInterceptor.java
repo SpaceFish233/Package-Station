@@ -47,15 +47,18 @@ public class JwtInterceptor implements HandlerInterceptor {
             request.setAttribute("username", username);
             request.setAttribute("role", role);
 
-            // 普通用户 (role=1) 只能访问自助取件相关接口
+            // 普通用户 (role=1) 只能访问自助取件、用户中心、通知相关接口
             if (role != null && role == 1) {
                 String uri = request.getRequestURI();
                 boolean allowed = uri.equals("/api/packages/outbound/self")
                         || uri.equals("/api/packages/query")
                         || uri.equals("/api/packages/confirm")
-                        || uri.startsWith("/api/packages/outbound/self/");
+                        || uri.equals("/api/packages/my")
+                        || uri.startsWith("/api/packages/outbound/self/")
+                        || uri.startsWith("/api/user/")
+                        || uri.equals("/api/notifications");
                 if (!allowed) {
-                    writeError(response, 403, "权限不足，普通用户只能使用自助取件功能");
+                    writeError(response, 403, "权限不足");
                     return false;
                 }
             }

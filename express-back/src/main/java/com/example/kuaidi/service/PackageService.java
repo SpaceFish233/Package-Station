@@ -13,6 +13,7 @@ public interface PackageService {
     Package staffOutbound(OutboundDTO dto, Integer operatorId);
     Package confirmPickup(Integer packageId);
     List<Package> queryByTrackingNumberOrPhone(String trackingNumber, String phone);
+    List<Package> queryByPhones(List<String> phones);
     PageResultVO<Package> queryPackages(String trackingNumber, String pickupCode,
                                          String phone, Integer status, Integer page, Integer size);
 }

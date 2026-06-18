@@ -12,23 +12,16 @@ const staffInfo = computed(() => {
   } catch { return {} }
 })
 
-const allMenuItems = [
+// 管理员菜单（此组件仅管理员使用）
+const menuItems = [
   { path: '/', icon: 'DataAnalysis', title: '工作台' },
   { path: '/inbound', icon: 'Download', title: '快递入库' },
   { path: '/outbound', icon: 'Upload', title: '快递出库' },
   { path: '/packages', icon: 'List', title: '包裹查询' },
   { path: '/shelves', icon: 'Grid', title: '货架管理' },
   { path: '/companies', icon: 'Van', title: '快递公司' },
+  { path: '/admin/notifications', icon: 'Bell', title: '通知管理' },
 ]
-
-// 普通用户只显示自助取件，管理员显示全部菜单
-const menuItems = computed(() => {
-  const role = staffInfo.value.role ?? 1
-  if (role === 1) {
-    return [{ path: '/pickup', icon: 'Position', title: '自助取件' }]
-  }
-  return allMenuItems
-})
 
 function handleLogout() {
   localStorage.removeItem('token')

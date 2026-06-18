@@ -15,6 +15,7 @@ public interface PackageMapper {
     Package findByTrackingNumber(@Param("trackingNumber") String trackingNumber);
     Package findByPickupCode(@Param("pickupCode") String pickupCode);
     List<Package> findByReceiverPhone(@Param("phone") String phone);
+    List<Package> findByPhones(@Param("phones") List<String> phones);
     List<Package> findByTrackingNumberOrPhone(@Param("trackingNumber") String trackingNumber, @Param("phone") String phone);
     List<Package> findWithConditions(@Param("trackingNumber") String trackingNumber,
                                      @Param("pickupCode") String pickupCode,

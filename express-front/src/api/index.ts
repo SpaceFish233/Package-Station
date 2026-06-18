@@ -35,6 +35,53 @@ export function getPackageList(params: any) {
   return request.get('/packages', { params })
 }
 
+// ---- 用户中心 ----
+export function getUserInfo() {
+  return request.get('/user/info')
+}
+
+export function updateProfile(data: { realName: string }) {
+  return request.put('/user/profile', data)
+}
+
+export function updatePassword(data: { oldPassword: string; newPassword: string }) {
+  return request.put('/user/password', data)
+}
+
+export function getUserPhones() {
+  return request.get('/user/phones')
+}
+
+export function addUserPhone(data: { phone: string }) {
+  return request.post('/user/phones', data)
+}
+
+export function deleteUserPhone(id: number) {
+  return request.delete(`/user/phones/${id}`)
+}
+
+// ---- 通知 ----
+export function getNotifications() {
+  return request.get('/notifications')
+}
+
+export function createNotification(data: { title: string; content: string }) {
+  return request.post('/admin/notifications', data)
+}
+
+export function updateNotification(id: number, data: { title: string; content: string }) {
+  return request.put(`/admin/notifications/${id}`, data)
+}
+
+export function deleteNotification(id: number) {
+  return request.delete(`/admin/notifications/${id}`)
+}
+
+// ---- 我的包裹 ----
+export function getMyPackages() {
+  return request.get('/packages/my')
+}
+
 // ---- 快递公司 ----
 export function getCompanies() {
   return request.get('/companies')

@@ -35,7 +35,7 @@ async function handleLogin() {
     if (role === 0) {
       router.push('/')
     } else {
-      router.push('/pickup')
+      router.push('/u')
     }
   } catch {
     // 错误已在拦截器处理

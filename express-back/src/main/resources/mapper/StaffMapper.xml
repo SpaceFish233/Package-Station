@@ -15,4 +15,12 @@
         VALUES (#{username}, #{password}, #{realName}, #{phone}, #{role})
     </insert>
 
+    <update id="updateRealName">
+        UPDATE staff SET real_name = #{realName} WHERE id = #{id}
+    </update>
+
+    <update id="updatePassword">
+        UPDATE staff SET password = #{password} WHERE id = #{id}
+    </update>
+
 </mapper>

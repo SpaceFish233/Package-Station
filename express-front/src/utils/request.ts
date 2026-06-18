@@ -37,7 +37,7 @@ request.interceptors.response.use(
       // 普通用户被拒绝时，跳转到取件页
       const staffInfo = JSON.parse(localStorage.getItem('staffInfo') || '{}')
       if (staffInfo.role === 1) {
-        router.push('/pickup')
+        router.push('/u')
       }
     } else {
       ElMessage.error(error.response?.data?.message || '网络错误')

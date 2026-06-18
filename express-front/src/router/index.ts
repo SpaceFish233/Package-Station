@@ -15,11 +15,7 @@ const router = createRouter({
       component: () => import('@/views/Register.vue'),
       meta: { public: true },
     },
-    {
-      path: '/pickup',
-      name: 'pickup',
-      component: () => import('@/views/Pickup.vue'),
-    },
+    // 管理员页面（左侧菜单布局）
     {
       path: '/',
       component: () => import('@/components/Layout.vue'),
@@ -30,6 +26,17 @@ const router = createRouter({
         { path: 'packages', name: 'packages', component: () => import('@/views/PackageList.vue') },
         { path: 'shelves', name: 'shelves', component: () => import('@/views/Shelves.vue') },
         { path: 'companies', name: 'companies', component: () => import('@/views/Companies.vue') },
+        { path: 'admin/notifications', name: 'admin-notifications', component: () => import('@/views/AdminNotifications.vue') },
+      ],
+    },
+    // 普通用户页面（顶部导航布局）
+    {
+      path: '/u',
+      component: () => import('@/components/UserLayout.vue'),
+      children: [
+        { path: '', name: 'pickup', component: () => import('@/views/Pickup.vue') },
+        { path: 'notifications', name: 'user-notifications', component: () => import('@/views/UserNotifications.vue') },
+        { path: 'center', name: 'user-center', component: () => import('@/views/UserCenter.vue') },
       ],
     },
   ],
@@ -39,37 +46,41 @@ const router = createRouter({
 router.beforeEach((to, _from, next) => {
   const token = localStorage.getItem('token')
 
-  // 未登录：只能访问登录页
+  // 未登录：只能访问公开页面
   if (!to.meta.public && !token) {
     next('/login')
     return
   }
 
-  // 已登录：根据角色控制可访问页面
+  // 已登录：根据角色分流
   if (token) {
-    let role = 1 // 默认普通用户
+    let role = 1
     try {
       const staffInfo = JSON.parse(localStorage.getItem('staffInfo') || '{}')
       role = staffInfo.role ?? 1
     } catch { /* ignore */ }
 
-    // 普通用户 (role=1) 只能访问 /pickup 和 /login
+    // 普通用户 (role=1)
     if (role === 1) {
+      // 访问登录页 → 重定向到取件页
       if (to.name === 'login') {
-        // 已登录普通用户访问登录页，重定向到取件页
-        next('/pickup')
+        next('/u')
         return
       }
-      if (to.name !== 'pickup') {
-        next('/pickup')
+      // 访问管理员页面 → 重定向到取件页
+      if (to.path !== '/u' && !to.path.startsWith('/u/')) {
+        next('/u')
         return
       }
     }
 
-    // 管理员 (role=0) 访问 /pickup 时重定向到工作台
-    if (role === 0 && to.name === 'pickup') {
-      next('/')
-      return
+    // 管理员 (role=0)
+    if (role === 0) {
+      // 访问用户页面 → 重定向到工作台
+      if (to.path === '/u' || to.path.startsWith('/u/')) {
+        next('/')
+        return
+      }
     }
   }
 
