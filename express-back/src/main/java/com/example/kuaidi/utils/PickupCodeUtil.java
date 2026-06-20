@@ -19,9 +19,10 @@ public class PickupCodeUtil {
     /**
      * 生成已失效的取件码
      * @param pickupCode 原取件码，如 A-01-1
-     * @return 已失效标记，如 A-01-1-已失效
+     * @param sequence   失效序号（从1开始），如 1 → A-01-1-已失效1
+     * @return 已失效标记，如 A-01-1-已失效1
      */
-    public static String markInvalid(String pickupCode) {
-        return pickupCode + "-已失效";
+    public static String markInvalid(String pickupCode, int sequence) {
+        return pickupCode + "-已失效" + sequence;
     }
 }

@@ -71,6 +71,24 @@ public class PackageController {
         return ResultVO.success(packageService.queryByPhones(phones));
     }
 
+    /**
+     * 查询当前用户指定状态的包裹
+     */
+    @GetMapping("/my/status")
+    public ResultVO<List<Package>> myPackagesByStatus(@RequestParam Integer status, HttpServletRequest request) {
+        Integer staffId = (Integer) request.getAttribute("staffId");
+        List<String> phones = new ArrayList<>();
+        com.example.kuaidi.entity.Staff staff = staffService.getById(staffId);
+        if (staff != null && staff.getPhone() != null && !staff.getPhone().isEmpty()) {
+            phones.add(staff.getPhone());
+        }
+        List<UserPhone> extraPhones = userPhoneService.getByStaffId(staffId);
+        for (UserPhone up : extraPhones) {
+            phones.add(up.getPhone());
+        }
+        return ResultVO.success(packageService.queryByPhonesAndStatus(phones, status));
+    }
+
     @PostMapping("/confirm")
     public ResultVO<Package> confirmPickup(@RequestBody java.util.Map<String, Integer> body) {
         Integer packageId = body.get("packageId");

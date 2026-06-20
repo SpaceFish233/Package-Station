@@ -16,6 +16,7 @@ public interface PackageMapper {
     Package findByPickupCode(@Param("pickupCode") String pickupCode);
     List<Package> findByReceiverPhone(@Param("phone") String phone);
     List<Package> findByPhones(@Param("phones") List<String> phones);
+    List<Package> findByPhonesAndStatus(@Param("phones") List<String> phones, @Param("status") Integer status);
     List<Package> findByTrackingNumberOrPhone(@Param("trackingNumber") String trackingNumber, @Param("phone") String phone);
     List<Package> findWithConditions(@Param("trackingNumber") String trackingNumber,
                                      @Param("pickupCode") String pickupCode,
@@ -31,4 +32,5 @@ public interface PackageMapper {
     long countTodayOut();
     long countStock();
     long countByShelfId(@Param("shelfId") Integer shelfId);
+    Integer findMaxInvalidSuffix(@Param("pickupCodePrefix") String pickupCodePrefix);
 }

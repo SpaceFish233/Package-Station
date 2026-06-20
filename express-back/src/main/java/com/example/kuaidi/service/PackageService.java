@@ -14,6 +14,7 @@ public interface PackageService {
     Package confirmPickup(Integer packageId);
     List<Package> queryByTrackingNumberOrPhone(String trackingNumber, String phone);
     List<Package> queryByPhones(List<String> phones);
+    List<Package> queryByPhonesAndStatus(List<String> phones, Integer status);
     PageResultVO<Package> queryPackages(String trackingNumber, String pickupCode,
                                          String phone, Integer status, Integer page, Integer size);
 }

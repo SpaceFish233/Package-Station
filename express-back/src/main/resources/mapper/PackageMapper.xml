@@ -84,10 +84,21 @@
         AND p.status = 0
     </select>
 
+    <select id="findByPhonesAndStatus" resultMap="packageResultMap">
+        SELECT <include refid="columns"/> FROM package p
+        <include refid="joins"/>
+        WHERE p.receiver_phone IN
+        <foreach collection="phones" item="phone" open="(" separator="," close=")">
+            #{phone}
+        </foreach>
+        AND p.status = #{status}
+        ORDER BY p.out_time DESC
+    </select>
+
     <select id="findByTrackingNumberOrPhone" resultMap="packageResultMap">
         SELECT <include refid="columns"/> FROM package p
         <include refid="joins"/>
-        WHERE 1=1
+        WHERE 1=0
         <if test="trackingNumber != null and trackingNumber != ''">
             OR p.tracking_number = #{trackingNumber}
         </if>
@@ -150,6 +161,16 @@
 
     <select id="countByShelfId" resultType="long">
         SELECT COUNT(*) FROM package WHERE shelf_id = #{shelfId} AND status = 0
+    </select>
+
+    <select id="findMaxInvalidSuffix" resultType="java.lang.Integer">
+        SELECT IFNULL(MAX(CAST(
+            CASE WHEN SUBSTRING(pickup_code, CHAR_LENGTH(#{pickupCodePrefix}) + 5) REGEXP '^[0-9]+$'
+                 THEN SUBSTRING(pickup_code, CHAR_LENGTH(#{pickupCodePrefix}) + 5)
+                 ELSE NULL END
+        AS UNSIGNED)), 0)
+        FROM package
+        WHERE pickup_code LIKE CONCAT(#{pickupCodePrefix}, '-已失效%')
     </select>
 
 </mapper>

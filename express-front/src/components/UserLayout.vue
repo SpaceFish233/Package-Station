@@ -156,7 +156,7 @@ function handleLogout() {
   background: rgba(255,255,255,0.1);
 }
 
-.nav-link.router-link-active {
+.nav-link.router-link-exact-active {
   color: #fff;
   background: rgba(232,145,58,0.25);
 }

@@ -82,6 +82,10 @@ export function getMyPackages() {
   return request.get('/packages/my')
 }
 
+export function getMyPackagesByStatus(status: number) {
+  return request.get('/packages/my/status', { params: { status } })
+}
+
 // ---- 快递公司 ----
 export function getCompanies() {
   return request.get('/companies')

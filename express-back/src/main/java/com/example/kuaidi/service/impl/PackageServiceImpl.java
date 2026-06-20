@@ -115,6 +115,14 @@ public class PackageServiceImpl implements PackageService {
     }
 
     @Override
+    public List<Package> queryByPhonesAndStatus(List<String> phones, Integer status) {
+        if (phones == null || phones.isEmpty()) {
+            return List.of();
+        }
+        return packageMapper.findByPhonesAndStatus(phones, status);
+    }
+
+    @Override
     @Transactional
     public Package confirmPickup(Integer packageId) {
         Package pkg = packageMapper.findById(packageId);
@@ -129,8 +137,10 @@ public class PackageServiceImpl implements PackageService {
         packageMapper.updateStatus(pkg.getId(), 1);
         packageMapper.updateOutTime(pkg.getId());
 
-        // 取件码标记为已失效
-        packageMapper.updatePickupCode(pkg.getId(), PickupCodeUtil.markInvalid(pkg.getPickupCode()));
+        // 取件码标记为已失效（按序递增）
+        Integer maxSuffix = packageMapper.findMaxInvalidSuffix(pkg.getPickupCode());
+        int nextSuffix = (maxSuffix == null ? 0 : maxSuffix) + 1;
+        packageMapper.updatePickupCode(pkg.getId(), PickupCodeUtil.markInvalid(pkg.getPickupCode(), nextSuffix));
 
         // 记录取件记录（用户自助）
         PickupRecord record = new PickupRecord();
@@ -180,8 +190,10 @@ public class PackageServiceImpl implements PackageService {
         packageMapper.updateStatus(pkg.getId(), 1); // 已取件
         packageMapper.updateOutTime(pkg.getId());
 
-        // 取件码标记为已失效
-        packageMapper.updatePickupCode(pkg.getId(), PickupCodeUtil.markInvalid(pkg.getPickupCode()));
+        // 取件码标记为已失效（按序递增）
+        Integer maxSuffix = packageMapper.findMaxInvalidSuffix(pkg.getPickupCode());
+        int nextSuffix = (maxSuffix == null ? 0 : maxSuffix) + 1;
+        packageMapper.updatePickupCode(pkg.getId(), PickupCodeUtil.markInvalid(pkg.getPickupCode(), nextSuffix));
 
         // 记录取件记录
         PickupRecord record = new PickupRecord();

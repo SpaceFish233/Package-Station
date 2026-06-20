@@ -29,7 +29,7 @@ async function handleLogin() {
     const res: any = await login(form.value)
     localStorage.setItem('token', res.data.token)
     localStorage.setItem('staffInfo', JSON.stringify(res.data.staffInfo))
-    ElMessage.success('登录成功')
+    ElMessage.success({ message: '登录成功', duration: 2000 })
     // 根据角色跳转：管理员->工作台，普通用户->取件页
     const role = res.data.staffInfo?.role ?? 1
     if (role === 0) {

@@ -2,7 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { getMyPackages, confirmPickup } from '@/api'
+import { getMyPackages, getMyPackagesByStatus, confirmPickup } from '@/api'
 
 const router = useRouter()
 
@@ -20,26 +20,34 @@ function handleLogout() {
 
 const loading = ref(false)
 const packageList = ref<any[]>([])
+const showSigned = ref(false)
 
 // 页面加载时自动查询该用户关联的所有包裹（主手机号 + 额外手机号）
-onMounted(async () => {
+onMounted(() => loadPackages())
+
+async function loadPackages() {
   loading.value = true
   try {
-    const res: any = await getMyPackages()
+    const res: any = showSigned.value
+      ? await getMyPackagesByStatus(1)
+      : await getMyPackages()
     packageList.value = res.data || []
   } catch {} finally {
     loading.value = false
   }
-})
+}
+
+function toggleSigned() {
+  showSigned.value = !showSigned.value
+  loadPackages()
+}
 
 async function handleConfirm(pkg: any) {
   loading.value = true
   try {
     await confirmPickup(pkg.id)
     ElMessage.success('确认收货成功！')
-    // 刷新列表
-    const res: any = await getMyPackages()
-    packageList.value = res.data || []
+    loadPackages()
   } catch {} finally {
     loading.value = false
   }
@@ -79,9 +87,10 @@ function statusType(status: number) {
             <span class="package-count">共 {{ packageList.length }} 个包裹</span>
           </div>
           <div class="user-center-link">
-            <router-link to="/u/center" class="link-text">
-              <el-icon><Setting /></el-icon> 添加额外手机号可查看更多包裹
-            </router-link>
+            <el-button text :type="showSigned ? 'warning' : 'primary'" @click="toggleSigned" :loading="loading">
+              <el-icon><component :is="showSigned ? 'Box' : 'DocumentChecked'" /></el-icon>
+              {{ showSigned ? '查看待取件包裹' : '查看已签收包裹' }}
+            </el-button>
           </div>
         </el-card>
       </div>

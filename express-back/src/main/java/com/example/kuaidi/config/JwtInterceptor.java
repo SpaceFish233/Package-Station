@@ -54,6 +54,7 @@ public class JwtInterceptor implements HandlerInterceptor {
                         || uri.equals("/api/packages/query")
                         || uri.equals("/api/packages/confirm")
                         || uri.equals("/api/packages/my")
+                        || uri.equals("/api/packages/my/status")
                         || uri.startsWith("/api/packages/outbound/self/")
                         || uri.startsWith("/api/user/")
                         || uri.equals("/api/notifications");
