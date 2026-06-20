@@ -123,12 +123,24 @@ jwt:
 
 ### 3. 启动后端
 
+#### 命令行启动
+
 ```bash
 cd express-back
 mvn spring-boot:run
 ```
 
 后端默认运行在 `http://localhost:8080`。
+
+#### IntelliJ IDEA 启动
+
+1. 打开 IntelliJ IDEA，选择 `File → Open`，选择 `express-back` 目录
+2. 等待 Maven 依赖导入完成（右下角进度条）
+3. 找到入口类 `src/main/java/com/example/kuaidi/KuaidiApplication.java`
+4. 右键点击 `KuaidiApplication` → `Run 'KuaidiApplication.main()'`
+5. 控制台出现 `Started KuaidiApplication in x.xx seconds` 表示启动成功
+
+> **提示：** 首次运行前请确保已复制并配置好 `application.yml`（参考上方"配置后端"步骤）。
 
 ### 4. 启动前端
 

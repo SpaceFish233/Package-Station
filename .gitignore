@@ -10,6 +10,7 @@ express-front/node_modules
 express-front/dist
 
 # 后端构建产物
+target/
 express-back/target
 express-back/HELP.md
 express-back/*.log
